@@ -6,16 +6,16 @@ N point masses bound by gravitational attraction.
 The program should compile on any POSIX-compliant system with X11.
 
 ## Input
-The initial state of the system is read from the `standard input`. Each
-line specifies position, velocity, and mass of a point:
+The initial state of the system is read from the standard input. Each
+line specifies the position, velocity, and mass of a point:
 
     x1 y1 z1    v1_x v1_y v1_z    m1
     x2 y2 z2    v2_x v2_y v2_z    m2
     ...
 
 ## Output
-The program draws trajectories of the points with color representing the
-current velocity of a point. Bluer colors mean higher speeds.
+The program draws trajectories of the points with colour representing the
+current velocity of a point. Bluer colours mean higher speeds.
 
 ## Keyboard controls
 key | action
@@ -32,7 +32,7 @@ simulation of small systems only, about a dozen points or so.
 
 To solve the equations of motion, the program uses the simplest Euler's
 integrator. The step of integration is chosen dynamically to achieve
-reasonable accuracy, but because of the low order of the method, the
+a reasonable accuracy, but because of the low order of the method, the
 step required often turns out to be very small. This too impedes the
 performance of the program.
 
