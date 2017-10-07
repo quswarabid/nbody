@@ -268,7 +268,6 @@ main (void) {
 			// Show pixmap
 			XCopyArea(disp, pm, win, gc, 0, 0, WH, WH, 0, 0);
 			// Wait
-//			usleep(1000000/FPS);
 			nanosleep(&ts, NULL);
 			// Send itself an exposure event
 			// to display the next frame
