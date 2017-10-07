@@ -73,15 +73,15 @@ Input:
     0 0 1200     0 60 0     1
 
 #### 3 bodies, irregular motion
-Planetary motion is destroyed by a massive body passing nearby.
+Orbital motion is destroyed by a massive body passing nearby.
 
-![d4-destroy](https://user-images.githubusercontent.com/29631214/31294039-1eb6e0ec-aae2-11e7-846b-224dbc699117.png)
+![d4-destroyed](https://user-images.githubusercontent.com/29631214/31306236-579ff64c-ab54-11e7-86fd-19d89f5faf1a.png)
 
 Input:
 
     0 800 -500     0 0 0       1000000
     0 1000 -500    0 0 50      100
-    0 0 5000       0 0 -150    10000000
+    0 0 5000       0 0 -100    10000000
 
 #### 9 bodies
 No physical meaning, just symmetric motion with sheer beauty.
