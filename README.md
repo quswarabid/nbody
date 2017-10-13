@@ -2,8 +2,19 @@
 This program calculates and displays the spatial motion of a system of
 N point masses bound by gravitational attraction.
 
+## Overview
+The program solves the equations of motion with the *leapfrog* method
+with the constant step of integration. To avoid singularities of the
+gravitational potential in cases of direct collisions, the force of
+attraction is artificially set to zero in the small neighbourhoods of
+the points. Therefore, the calculated dynamics resembles that of a
+system of small spherical shells capable of passing freely through each
+other.
+
 ## Requirements
-The program should compile on any POSIX-compliant system with X11.
+The program is written in the standard C99 and should compile on any
+POSIX-compliant system. For interactive graphics it requires nothing but
+plain Xlib.
 
 ## Input
 The initial state of the system is read from the standard input. Each
@@ -12,6 +23,8 @@ line specifies the position, velocity, and mass of a point:
     x1 y1 z1    v1_x v1_y v1_z    m1
     x2 y2 z2    v2_x v2_y v2_z    m2
     ...
+
+The step of integration is read from the first command line argument.
 
 ## Output
 The program draws trajectories of the points with colour representing the
@@ -25,33 +38,24 @@ d   | Dump state (time, positions, and velocities)
 c   | Check conservation laws (energy and momentum)
 
 ## Caveats
+The step of integration have to be found by trial and error: for
+example, by looking at how good the conservation laws are held.
+
 The calculation of the force exerted on a point by the others is the
 most time-consuming part of the program. For the system of N points, it
 requires O(N*N) operations, and therefore the program is suitable for
-simulation of small systems only, about a dozen points or so.
-
-To solve the equations of motion, the program uses the simplest Euler's
-integrator. The step of integration is chosen dynamically to achieve
-a reasonable accuracy, but because of the low order of the method, the
-step required often turns out to be very small. This too impedes the
-performance of the program.
-
-To avoid singularities of the gravitational potential in cases of direct
-collisions, the force of attraction is artificially set to zero in the
-small neighbourhoods of the points. Therefore, the calculated dynamics
-resembles that of a system of small spherical shells capable of passing
-freely through each other.
+simulations of small systems only, about a dozen points or so.
 
 ## Customization
 One can easily adjust most parameters, such as phase space size,
-projection centre and plane, target accuracy, regularization radius,
-etc. How to do that, should be evident from the comments in the source.
+projection centre and plane, regularization radius, etc. How to do that,
+should be evident from the comments in the source.
 
 ## Examples
 #### 3 bodies, regular motion
 A planet is orbiting a star of a binary system.
 
-![d3-stable](https://user-images.githubusercontent.com/29631214/31294041-1ebbbb6c-aae2-11e7-8f2b-8a18890c2d2d.png)
+![d3-stable](https://user-images.githubusercontent.com/29631214/31562119-e9a6d8a4-b062-11e7-849f-773c66905f45.png)
 
 Input:
 
@@ -62,9 +66,10 @@ Input:
 #### 3 bodies, transient motion
 A planet is orbiting a star of a binary system, then the influence of
 the second star outweighs, and the planet jumps to an orbit around the
-second star.
+second star. The planet jumps back to the first star at the next
+encounter.
 
-![d3-jump](https://user-images.githubusercontent.com/29631214/31294042-1ecf6590-aae2-11e7-9c84-e881c272e036.png)
+![d3-jump](https://user-images.githubusercontent.com/29631214/31562118-e985d23a-b062-11e7-8b1a-d5355ab7e1e3.png)
 
 Input:
 
@@ -75,7 +80,7 @@ Input:
 #### 3 bodies, irregular motion
 Orbital motion is destroyed by a massive body passing nearby.
 
-![d4-destroyed](https://user-images.githubusercontent.com/29631214/31306236-579ff64c-ab54-11e7-86fd-19d89f5faf1a.png)
+![d4-destroyed](https://user-images.githubusercontent.com/29631214/31562120-e9c4af6e-b062-11e7-90fa-d83da2bad49b.png)
 
 Input:
 
@@ -86,7 +91,7 @@ Input:
 #### 9 bodies
 No physical meaning, just symmetric motion with sheer beauty.
 
-![d2-symmetry](https://user-images.githubusercontent.com/29631214/31294043-1ee7f4ac-aae2-11e7-8023-45ab3c446987.png)
+![d2-symmetry](https://user-images.githubusercontent.com/29631214/31562117-e95994b8-b062-11e7-8cae-6de9ebd4816d.png)
 
 Input:
 
