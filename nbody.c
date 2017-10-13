@@ -1,11 +1,6 @@
 /*
- * Straightforward and naive N-body code.
- * Initial version.
- * 	- Euler's integrator with adaptive step;
- *	- Singularities are prevented by dropping forces to zero
- *	  in the vicinity of points;
- *	- Show speed by color.
- * Aug-Sep 2017
+ * Simple N-body code
+ * Oct 2017
  * Alexander Mukhin
  */
 
@@ -15,7 +10,6 @@
 #define WH 700 // screen width=height
 #define	G 1 // gravitational constant
 #define FPS 100 // frames per second
-#define EPS 0.001 // maximum absolute increment of position and speed
 #define DRMIN 10 // distance below which the force is set to zero
 #define ORDS 2.5 // orders of magnitude for color output
 #define DMAX 5 // maximum displacement of points between consecutive frames
@@ -28,7 +22,6 @@
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <time.h>
-#include <float.h>
 
 // Point
 struct p {
@@ -46,6 +39,7 @@ len (double x, double y, double z) {
 	return sqrt(x*x+y*y+z*z);
 }
 
+// Statistics
 double T,U,P_x,P_y,P_z;	// kinetic energy, potential energy, and momentum
 int C; // number of collisions (approaches below DRMIN)
 
@@ -56,7 +50,7 @@ proj (double x, double y, double z, int *u, int *v) {
 	double t; // parameter
 	double yp,zp; // coordinates of the projection point
 
-	// find projection coordinates in the phase space
+	// find the projection coordinates in the phase space
 	t = (Ex-Px)/(Ex-x);
 	yp = y*t;
 	zp = z*t;
@@ -65,16 +59,55 @@ proj (double x, double y, double z, int *u, int *v) {
 	*v = (int)floor((A-zp)*WH/(2*A));
 }
 
+// Compute accelerations and return potential energy
+double
+accel (struct p *ppl) {
+	struct p *p,*q; // pointers to population
+	double dx,dy,dz,dr; // distance vector and its length
+	double U; // potential energy
+
+	// Prepare
+	U = 0;
+	for (p=ppl; p; p=p->next)
+		p->ax = p->ay = p->az = 0;
+	// Loop for the pairs
+	for (p=ppl; p; p=p->next) {
+		for (q=p->next; q; q=q->next) {
+			dx = q->x-p->x;
+			dy = q->y-p->y;
+			dz = q->z-p->z;
+			dr = len(dx, dy, dz);
+			if (dr < DRMIN) {
+				// Singularity
+				++C;
+				U += -G*p->m*q->m/DRMIN;
+				continue;
+			}
+			// Acceleration of p caused by q
+			p->ax += (dx/dr)*G*q->m/(dr*dr);
+			p->ay += (dy/dr)*G*q->m/(dr*dr);
+			p->az += (dz/dr)*G*q->m/(dr*dr);
+			// Acceleration of q caused by p
+			q->ax += (-dx/dr)*G*p->m/(dr*dr);
+			q->ay += (-dy/dr)*G*p->m/(dr*dr);
+			q->az += (-dz/dr)*G*p->m/(dr*dr);
+			// Accumulate potential energy
+			U += -G*p->m*q->m/dr;
+		}
+	}
+	return U;
+}
+
 // Trace evolution from one frame to another
 double
-step (struct p *ppl) {
-	struct p *p,*q;	// pointers to population
-	double dx,dy,dz,dr; // distance vector and its length
-	double v,vmax,a,amax; // current and maximum velocity and acceleration
-	double t,dt; // time elapsed and time step
+step (struct p *ppl, double dt) {
+	struct p *p; // pointer to population
+	double v; // speed
+	double t; // time elapsed
+	double dx,dy,dz; // displacement components
 	double d,dmax; // current and maximum displacement
 
-	// Save current positions
+	// Save the current positions
 	for (p=ppl; p; p=p->next) {
 		p->px = p->x;
 		p->py = p->y;
@@ -83,68 +116,35 @@ step (struct p *ppl) {
 	// Keep advancing until we accumulate enough displacement
 	t = 0;
 	do {
-		// One step of Euler's method
-		T = U = P_x = P_y = P_z = 0;
-		vmax = amax = 0;
-		for (p=ppl; p; p=p->next)
-			p->ax = p->ay = p->az = 0;
-		// Find accelerations
+		// Find kinetic energy and momentum
+		T = P_x = P_y = P_z = 0;
 		for (p=ppl; p; p=p->next) {
-			// Loop for the pairs
-			for (q=p->next; q; q=q->next) {
-				dx = q->x-p->x;
-				dy = q->y-p->y;
-				dz = q->z-p->z;
-				dr = len(dx, dy, dz);
-				if (dr < DRMIN) {
-					// Singularity
-					++C;
-					U += -G*p->m*q->m/DRMIN;
-					continue;
-				}
-				// Acceleration of p caused by q
-				p->ax += (dx/dr)*G*q->m/(dr*dr);
-				p->ay += (dy/dr)*G*q->m/(dr*dr);
-				p->az += (dz/dr)*G*q->m/(dr*dr);
-				// Acceleration of q caused by p
-				q->ax += (-dx/dr)*G*p->m/(dr*dr);
-				q->ay += (-dy/dr)*G*p->m/(dr*dr);
-				q->az += (-dz/dr)*G*p->m/(dr*dr);
-				// Update potential energy
-				U += -G*p->m*q->m/dr;
-			}
-			// Collect statistics
 			v = len(p->vx, p->vy, p->vz);
-			if (v > vmax)
-				vmax = v;
-			a = len(p->ax, p->ay, p->az);
-			if (a > amax)
-				amax = a;
-			// Update kinetic energy and momentum
 			T += p->m*v*v/2;
 			P_x += p->m*p->vx;
 			P_y += p->m*p->vy;
 			P_z += p->m*p->vz;
 		}
-		// Find appropriate step
-		// Assume amax or vmax is not zero
-		dt = DBL_MAX;
-		if (amax != 0)
-			dt = EPS/amax;
-		if (vmax!=0 && EPS/vmax<dt)
-			dt = EPS/vmax;
-		// Modify positions and velocities
+		// One step of the leapfrog method.
+		// Find the positions at the next step
+		// using the midstep velocities
 		for (p=ppl; p; p=p->next) {
 			p->x += p->vx*dt;
 			p->y += p->vy*dt;
 			p->z += p->vz*dt;
+		}
+		// Find the accelerations at the next step
+		// (compute the potential energy as well)
+		U = accel(ppl);
+		// Find the velocities at the next midstep
+		for (p=ppl; p; p=p->next) {
 			p->vx += p->ax*dt;
 			p->vy += p->ay*dt;
 			p->vz += p->az*dt;
 		}
 		// Count time elapsed
 		t += dt;
-		// Find maximum displacement
+		// Find the maximum displacement
 		dmax = 0;
 		for (p=ppl; p; p=p->next) {
 			dx = p->x-p->px;
@@ -196,10 +196,10 @@ mag2clr (double v) {
 }
 
 int
-main (void) {
+main (int argc, char **argv) {
 	struct p *ppl; // population
 	struct p *p,*q;	// pointers to population
-	double t; // time elapsed
+	double dt,t; // time step and time elapsed
 	int u,v,pu,pv; // coordinates in pixel space
 	double s; // speed
 	struct timespec ts; // for delay between frames
@@ -211,6 +211,17 @@ main (void) {
         GC gc;
 	Pixmap pm;
 	KeySym ks;
+
+	// Read dt from argv[1]
+	if (argc != 2) {
+		fprintf(stderr, "Usage: %s dt\n", argv[0]);
+		return 1;
+	}
+	dt = atof(argv[1]);
+	if (dt <= 0) {
+		fprintf(stderr, "Wrong dt\n");
+		return 1;
+	}
 
 	// Initialize the population
 	ppl = q = NULL;
@@ -224,6 +235,14 @@ main (void) {
 		else
 			ppl = p; // first point
 		q = p;
+	}
+
+	// Compute the velocities at the first midstep
+	accel(ppl);
+	for (p=ppl; p; p=p->next) {
+		p->vx += p->ax*dt/2;
+		p->vy += p->ay*dt/2;
+		p->vz += p->az*dt/2;
 	}
 
 	// X init
@@ -254,7 +273,7 @@ main (void) {
 			// Drop all pending Exposure events
 			while (XCheckMaskEvent(disp, ExposureMask, &evt));
 			// Advance the system from one frame to another
-			t += step(ppl);
+			t += step(ppl, dt);
 			// Draw lines between consecutive positions
 			for (p=ppl; p; p=p->next) {
 				proj(p->x, p->y, p->z, &u, &v);
