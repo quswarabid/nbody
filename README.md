@@ -3,7 +3,7 @@ This program calculates and displays the spatial motion of a system of
 N point masses bound by gravitational attraction.
 
 ## Overview
-The program solves the equations of motion with the *leapfrog* method
+The program solves the equations of motion with the leapfrog method
 with the constant step of integration.
 
 To avoid singularities of the gravitational potential in cases of direct
