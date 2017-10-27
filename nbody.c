@@ -41,6 +41,7 @@ len (double x, double y, double z) {
 // Statistics
 double T, U; // kinetic and potential energy
 double P_x, P_y, P_z; // linear momentum
+double L_x, L_y, L_z; // angular momentum
 
 // Central projection
 void
@@ -111,14 +112,17 @@ step (struct p *ppl, double dt) {
 	// Keep advancing until we accumulate enough displacement
 	t = 0;
 	do {
-		// Find kinetic energy and momentum
-		T = P_x = P_y = P_z = 0;
+		// Find kinetic energy and momenta
+		T = P_x = P_y = P_z = L_x = L_y = L_z = 0;
 		for (p=ppl; p; p=p->next) {
 			v = len(p->vx, p->vy, p->vz);
 			T += p->m*v*v/2;
 			P_x += p->m*p->vx;
 			P_y += p->m*p->vy;
 			P_z += p->m*p->vz;
+			L_x += p->m*(p->y*p->vz-p->vy*p->z);
+			L_y += p->m*(-p->x*p->vz+p->vx*p->z);
+			L_z += p->m*(p->x*p->vy-p->vx*p->y);
 		}
 		// One step of the leapfrog method.
 		// Find the positions at the next step
@@ -298,6 +302,7 @@ main (int argc, char **argv) {
 				printf("t=%g\n", t);
 				printf("T+U=%g\n", T+U);
 				printf("P=%g\n", len(P_x,P_y,P_z));
+				printf("L=%g\n", len(L_x,L_y,L_z));
 				printf("\n");
 			}
 			if (ks == XK_d) {
