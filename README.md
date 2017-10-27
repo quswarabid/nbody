@@ -4,13 +4,9 @@ N point masses bound by gravitational attraction.
 
 ## Overview
 The program solves the equations of motion with the leapfrog method
-with the constant step of integration.
-
-To avoid singularities of the gravitational potential in cases of direct
-collisions, the force of attraction is artificially set to zero in the
-small neighbourhoods of the points. Therefore, the calculated dynamics
-resembles that of a system of small spherical shells capable of passing
-freely through each other.
+with the constant step of integration. The system of bodies is treated
+as a collisionless system, where singularities are avoided with the aid
+of Plummer softening.
 
 ## Requirements
 The program is written in the standard C99 and should compile on any
@@ -36,7 +32,7 @@ key | action
 ----|-------
 q   | Quit
 d   | Dump state (time, positions, and velocities)
-c   | Check conservation laws (energy and momentum)
+c   | Check conservation laws (total energy, linear and angular momenta)
 
 ## Caveats
 The step of integration have to be found by trial and error: for
@@ -49,7 +45,7 @@ simulations of small systems only, about a dozen points or so.
 
 ## Customization
 One can easily adjust most parameters, such as phase space size,
-projection centre and plane, regularization radius, etc. How to do that,
+projection centre and plane, softening radius, etc. How to do that,
 should be evident from the comments in the source.
 
 ## Examples
