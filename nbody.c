@@ -1,6 +1,5 @@
 /*
- * Simple N-body code
- * Oct 2017
+ * Simple collisionless N-body code
  * Alexander Mukhin
  */
 
@@ -10,9 +9,9 @@
 #define WH 700 // screen width=height
 #define	G 1 // gravitational constant
 #define FPS 100 // frames per second
-#define DRMIN 10 // distance below which the force is set to zero
 #define ORDS 2.5 // orders of magnitude for color output
 #define DMAX 5 // maximum displacement of points between consecutive frames
+#define EPS 0.1 // gravity softening radius
 
 #define _POSIX_C_SOURCE 200809L
 
@@ -25,10 +24,10 @@
 
 // Point
 struct p {
-	double x,y,z; // position
-	double px,py,pz; // previous position
-	double vx,vy,vz; // velocity
-	double ax,ay,az; // acceleration
+	double x, y, z; // position
+	double px, py, pz; // previous position
+	double vx, vy, vz; // velocity
+	double ax, ay, az; // acceleration
 	double m; // mass
 	struct p *next; // link
 };
@@ -40,15 +39,15 @@ len (double x, double y, double z) {
 }
 
 // Statistics
-double T,U,P_x,P_y,P_z;	// kinetic energy, potential energy, and momentum
-int C; // number of collisions (approaches below DRMIN)
+double T, U; // kinetic and potential energy
+double P_x, P_y, P_z; // linear momentum
 
 // Central projection
 void
 proj (double x, double y, double z, int *u, int *v) {
-	const double A=M*(Ex-Px)/(double)(Ex-M); // projection screen size: |yp,zp|<=A
+	const double A=M*(Ex-Px)/(double)(Ex-M); // screen size: |yp,zp|<=A
 	double t; // parameter
-	double yp,zp; // coordinates of the projection point
+	double yp, zp; // coordinates of the projection point
 
 	// find the projection coordinates in the phase space
 	t = (Ex-Px)/(Ex-x);
@@ -62,8 +61,9 @@ proj (double x, double y, double z, int *u, int *v) {
 // Compute accelerations and return potential energy
 double
 accel (struct p *ppl) {
-	struct p *p,*q; // pointers to population
-	double dx,dy,dz,dr; // distance vector and its length
+	struct p *p, *q; // pointers to population
+	double dx, dy, dz, dr; // distance vector and its length
+	double dr1; // "softened" distance
 	double U; // potential energy
 
 	// Prepare
@@ -77,22 +77,17 @@ accel (struct p *ppl) {
 			dy = q->y-p->y;
 			dz = q->z-p->z;
 			dr = len(dx, dy, dz);
-			if (dr < DRMIN) {
-				// Singularity
-				++C;
-				U += -G*p->m*q->m/DRMIN;
-				continue;
-			}
+			dr1 = sqrt(dr*dr+EPS*EPS); // Plummer softening
 			// Acceleration of p caused by q
-			p->ax += (dx/dr)*G*q->m/(dr*dr);
-			p->ay += (dy/dr)*G*q->m/(dr*dr);
-			p->az += (dz/dr)*G*q->m/(dr*dr);
+			p->ax += (dx/dr1)*G*q->m/(dr1*dr1);
+			p->ay += (dy/dr1)*G*q->m/(dr1*dr1);
+			p->az += (dz/dr1)*G*q->m/(dr1*dr1);
 			// Acceleration of q caused by p
-			q->ax += (-dx/dr)*G*p->m/(dr*dr);
-			q->ay += (-dy/dr)*G*p->m/(dr*dr);
-			q->az += (-dz/dr)*G*p->m/(dr*dr);
+			q->ax += -(dx/dr1)*G*p->m/(dr1*dr1);
+			q->ay += -(dy/dr1)*G*p->m/(dr1*dr1);
+			q->az += -(dz/dr1)*G*p->m/(dr1*dr1);
 			// Accumulate potential energy
-			U += -G*p->m*q->m/dr;
+			U += -G*p->m*q->m/dr1;
 		}
 	}
 	return U;
@@ -104,8 +99,8 @@ step (struct p *ppl, double dt) {
 	struct p *p; // pointer to population
 	double v; // speed
 	double t; // time elapsed
-	double dx,dy,dz; // displacement components
-	double d,dmax; // current and maximum displacement
+	double dx, dy, dz; // displacement components
+	double d, dmax; // current and maximum displacement
 
 	// Save the current positions
 	for (p=ppl; p; p=p->next) {
@@ -162,8 +157,8 @@ step (struct p *ppl, double dt) {
 // Color space conversion
 int
 hsv2rgb (double h, double s, double v) {
-	double c,x,m;
-	double r=0,g=0,b=0;
+	double c, x, m;
+	double r=0, g=0, b=0;
 	// Using definitions from Wiki
 	h *= 6;
 	c = s*v;
@@ -198,9 +193,9 @@ mag2clr (double v) {
 int
 main (int argc, char **argv) {
 	struct p *ppl; // population
-	struct p *p,*q;	// pointers to population
-	double dt,t; // time step and time elapsed
-	int u,v,pu,pv; // coordinates in pixel space
+	struct p *p, *q; // pointers to population
+	double dt, t; // time step and time elapsed
+	int u, v, pu, pv; // coordinates in pixel space
 	double s; // speed
 	struct timespec ts; // for delay between frames
 	// X stuff
@@ -300,18 +295,18 @@ main (int argc, char **argv) {
 				break;
 			if (ks == XK_c) {
 				// Check conservation laws
-				printf("t=%g, C=%d\n", t, C);
-				printf("T+U=%g, ", T+U);
+				printf("t=%g\n", t);
+				printf("T+U=%g\n", T+U);
 				printf("P=%g\n", len(P_x,P_y,P_z));
 				printf("\n");
 			}
 			if (ks == XK_d) {
 				// Dump state
-				printf("t=%g, C=%d\n", t, C);
+				printf("t=%g\n", t);
 				for (p=ppl; p; p=p->next) {
-					printf("%g,%g,%g ",p->x,p->y,p->z);
-					printf("%g,%g,%g ",p->vx,p->vy,p->vz);
-					printf("%g,%g,%g\n",p->ax,p->ay,p->az);
+					printf("%g,%g,%g ", p->x, p->y, p->z);
+					printf("%g,%g,%g ", p->vx, p->vy, p->vz);
+					printf("%g,%g,%g\n", p->ax, p->ay, p->az);
 				}
 				printf("\n");
 			}
