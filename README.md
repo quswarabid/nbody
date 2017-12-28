@@ -28,16 +28,16 @@ The program draws points with colour representing the current velocity
 of a point. Bluer colours mean higher speeds.
 
 ## Keyboard controls
-key | action
-----|-------
-q   | Quit
-c   | Check the conservation laws (for the total energy, linear and angular momenta), and the virial theorem
-s   | Show octree performance counters and memory statistics
-t   | Toggle drawing of the traces left by points as they move
-e   | Toggle drawing of the edges of octree nodes
-← → | Decrease and increase the viewing angle φ by 15 degrees
-↓ ↑ | Decrease and increase the viewing angle θ by 15 degrees
-d   | Dump the current state to stderr in the same format as input
+key     | action
+--------|-------
+`q`     | Quit
+`c`     | Check the conservation laws (for the total energy, linear and angular momenta), and the virial theorem
+`s`     | Show octree performance counters and memory statistics
+`t`     | Toggle drawing of the traces left by points as they move
+`e`     | Toggle drawing of the edges of octree nodes
+`←` `→` | Decrease and increase the viewing angle φ by 15 degrees
+`↓` `↑` | Decrease and increase the viewing angle θ by 15 degrees
+`d`     | Dump the current state to `stderr` in the same format as input
 
 ## Configuration
 Most parameters are set by the `#define` directives in the source code.
@@ -46,15 +46,20 @@ Each directive has a comment describing its meaning.
 ## Generation of initial values
 To feed the program with initial values, two auxiliary programs are
 supplied:
+
 * `genpoints-sph.c`: generates various mass distributions with spherical symmetry
 * `genpoints-disk.c`: generates the Kuzmin disk
+
 These programs are configured with the `#define` directives and `const`
 variables in the source (see the comments).
 
 ## Examples
-Development of a spiral structure out of Kuzmin disk:
-The parameters of the simulation and the disk are the same as set currently
+Development of the spiral structure out of a Kuzmin disk:
+
+![spiral4](https://user-images.githubusercontent.com/29631214/34419360-860b6ee8-ec14-11e7-91eb-c3449af45288.png)
+
+This image is created with the same parameters of the simulation and the disk as set currently
 in the source.
 
 ## License
-The program is in the public domain.
+The programs are in the public domain.
