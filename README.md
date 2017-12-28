@@ -53,7 +53,7 @@ supplied:
 These programs are configured with the `#define` directives and `const`
 variables in the source (see the comments).
 
-## Examples
+## Example
 Development of the spiral structure out of a Kuzmin disk:
 
 ![spiral4](https://user-images.githubusercontent.com/29631214/34419360-860b6ee8-ec14-11e7-91eb-c3449af45288.png)
