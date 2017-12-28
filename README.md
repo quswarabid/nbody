@@ -48,7 +48,7 @@ To feed the program with initial values, two auxiliary programs are
 supplied:
 
 * `genpoints-sph.c`: generates various mass distributions with spherical symmetry
-* `genpoints-disk.c`: generates the Kuzmin disk
+* `genpoints-disk.c`: generates a Kuzmin disk
 
 These programs are configured with the `#define` directives and `const`
 variables in the source (see the comments).
