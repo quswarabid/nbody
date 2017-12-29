@@ -3,16 +3,16 @@ This program calculates and displays the spatial motion of a system of
 point masses bound by gravitational attraction.
 
 ## Overview
-The equations of motion are solved with the leapfrog method with the
+The equations of motion are solved by the leapfrog method with the
 constant step of integration. The system of bodies is treated as a
 collisionless system, where singularities are avoided with the aid of
 the Plummer softening. The gravitational potential is computed
-approximately with the Barnes-Hut octree method.
+approximately by the Barnes-Hut octree method.
 
 ## Requirements
-The program is written in the standard C99 and should compile on any
+The program is written in the standard C99 and can be compiled on any
 POSIX-compliant system. It uses plain Xlib for interactive graphics.
-The program contains provisions for being compiled with OpenMP to
+The program contains provisions for being built with OpenMP to
 achieve some level of parallelism in the most time consuming part.
 
 ## Input
@@ -31,7 +31,7 @@ of a point. Bluer colours mean higher speeds.
 key     | action
 --------|-------
 `q`     | Quit
-`c`     | Check the conservation laws (for the total energy, linear and angular momenta), and the virial theorem
+`c`     | Check conservation laws and the virial theorem
 `s`     | Show octree performance counters and memory statistics
 `t`     | Toggle drawing of the traces left by points as they move
 `e`     | Toggle drawing of the edges of octree nodes
@@ -58,8 +58,8 @@ A structure with spiral arms evolved out of a Kuzmin disk:
 
 ![spiral6](https://user-images.githubusercontent.com/29631214/34434604-441e67c2-ec98-11e7-8316-5fba22eaf779.png)
 
-This image is created with the same parameters of the simulation and the disk as set currently
-in the source.
+This image is created with the same parameters of the simulation and the
+disk as set currently in the source.
 
 ## License
 The programs are in the public domain.
