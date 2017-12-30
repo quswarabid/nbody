@@ -35,8 +35,8 @@ key     | action
 `s`     | Show octree performance counters and memory statistics
 `t`     | Toggle drawing of the traces left by points as they move
 `e`     | Toggle drawing of the edges of octree nodes
-`←` `→` | Decrease and increase the viewing angle φ by 15 degrees
-`↓` `↑` | Decrease and increase the viewing angle θ by 15 degrees
+`←` `→` | Decrease and increase the viewing angle φ by 15°
+`↓` `↑` | Decrease and increase the viewing angle θ by 15°
 `d`     | Dump the current state to `stderr` in the same format as input
 
 ## Configuration
