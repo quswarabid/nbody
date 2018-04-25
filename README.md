@@ -56,7 +56,7 @@ variables in the source (see the comments).
 ## Example
 A structure with spiral arms evolved out of a Kuzmin disk:
 
-![spiral6](https://user-images.githubusercontent.com/29631214/34434604-441e67c2-ec98-11e7-8316-5fba22eaf779.png)
+![](docs/kuzmin.png)
 
 This image is created with the same parameters of the simulation and the
 disk as set currently in the source.
