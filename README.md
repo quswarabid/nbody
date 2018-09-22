@@ -62,4 +62,4 @@ This image is created with the same parameters of the simulation and the
 disk as set currently in the source.
 
 ## License
-The programs are in the public domain.
+MIT.

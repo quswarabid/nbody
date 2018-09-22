@@ -2,7 +2,10 @@
 	Simple collisionless N-body code:
 	- fixed-step leapfrog integrator;
 	- Plummer softening;
-	- Barnes-Hut tree. 
+	- Barnes-Hut tree.
+
+	Copyright (c) 2018 Alexander Mukhin
+	MIT License
  */
 
 #define DT 0.1 // time step
